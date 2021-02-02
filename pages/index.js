@@ -1,38 +1,43 @@
-import Head from "next/head";
-import styles from "../styles/Home.module.css";
-import Link from "next/link";
-import Logo from "../components/LogoTwinextjs";
-import LoginGithub from "components/LoginGithub";
+import LoginGithub from "components/LoginGithub"
+import Avatar from "components/Avatar"
+import React, { useState, useEffect } from "react"
+import AppLayout from "Layouts/AppLayout"
 
-import { useState, useEffect } from "react";
-import { onAuthStateChanged } from "firebase/client";
-export default function Home({ name }) {
-  const [user, setUser] = useState(undefined);
+import { onAuthStateChanged } from "firebase/client"
 
-  useEffect(() => {
-    onAuthStateChanged(setUser);
-  }, []);
-
-  return (
-    <div className={styles.container}>
-      <Head>
-        <title>Twitter</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-      <div className={styles.content}>
-        <h1 className={styles.title}> Twinext.js</h1>
-        {user === null && <LoginGithub setUser={setUser} />}
-        {user && (
-          <div>
-            <img src={user.avatar} />
-            <strong>{user.username}</strong>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+const getUserStateValue = function (user) {
+  return {
+    isLogged: () => user,
+    isNotLogged: () => user === null,
+    isLoading: () => user === undefined,
+  }
 }
 
-Home.getInitialProps = () => {
-  return fetch("http://localhost:3000/api/hello").then((res) => res.json());
-};
+export default function Home({ name }) {
+  const [user, setUser] = useState(undefined)
+  const USER_STATE = getUserStateValue(user)
+
+  useEffect(() => {
+    onAuthStateChanged(setUser)
+  }, [])
+
+  const condicionalRenderingAvatar = () => {
+    return (
+      USER_STATE.isLogged() && (
+        <Avatar avatar={user.avatar} username={user.username} />
+      )
+    )
+  }
+
+  const condicionalRenderingGithubLogin = () => {
+    return USER_STATE.isNotLogged() && <LoginGithub setUser={setUser} />
+  }
+
+  return (
+    <AppLayout centerItems={true} titleHead="Twinext.js">
+      <h1> Twinext.js</h1>
+      {condicionalRenderingGithubLogin()}
+      {condicionalRenderingAvatar()}
+    </AppLayout>
+  )
+}

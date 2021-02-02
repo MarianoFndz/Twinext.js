@@ -1,0 +1,12 @@
+.container {
+  display: flex;
+  padding: 1rem;
+  border-bottom: solid 1px #f0f8ed;
+}
+
+.img {
+  border-radius: 50%;
+  width: 49px;
+  height: 49px;
+  margin-right: 1rem;
+}

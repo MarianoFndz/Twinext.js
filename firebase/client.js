@@ -1,4 +1,4 @@
-import firebase from "firebase";
+import firebase from "firebase"
 
 const firebaseConfig = {
   apiKey: "AIzaSyDitKLoYLDfzW9UyFPiVsdcrPDQgnT7A4g",
@@ -8,31 +8,32 @@ const firebaseConfig = {
   messagingSenderId: "305964128137",
   appId: "1:305964128137:web:66c687491673c609923358",
   measurementId: "G-13ER35MZMX",
-};
+}
 
-!firebase.apps.length && firebase.initializeApp(firebaseConfig);
+!firebase.apps.length && firebase.initializeApp(firebaseConfig)
 
-const mapUserFromFirebaseAuthToUser = (user) => {
-  const { displayName, email, photoURL } = user;
+export const onAuthStateChanged = (onChange) => {
+  return firebase.auth().onAuthStateChanged((user) => {
+    const normalizedUser = mapUserFromFirebaseAuthToUser(user)
+    onChange(normalizedUser)
+  })
+}
+
+export const loginWithGithub = () => {
+  const githubProvider = new firebase.auth.GithubAuthProvider()
+  return firebase
+    .auth()
+    .signInWithPopup(githubProvider)
+    .then(mapUserFromFirebaseAuthToUser)
+}
+
+function mapUserFromFirebaseAuthToUser(user) {
+  if (!user) return null
+  const { displayName, email, photoURL } = user
 
   return {
     avatar: photoURL,
     username: displayName,
     email,
-  };
-};
-
-export const onAuthStateChanged = (onChange) => {
-  return firebase.auth().onAuthStateChanged((user) => {
-    const normalizedUser = mapUserFromFirebaseAuthToUser(user);
-    onChange(normalizedUser);
-  });
-};
-
-export const loginWithGithub = () => {
-  const githubProvider = new firebase.auth.GithubAuthProvider();
-  return firebase
-    .auth()
-    .signInWithPopup(githubProvider)
-    .then(mapUserFromFirebaseAuthToUser);
-};
+  }
+}
